@@ -4,7 +4,8 @@
 * Lorenz did a fantastic job in sharing codes when he published Nature 2023 paper (See https://gitlab.mpcdf.mpg.de/mpibr/laur/inter-hemispheric-rem). I want to follow his approach in our paper.
 * The aim is to post all codes and jupyter notebooks that was used to generate figures here.
     * Assume that you will save all outputs in `figures/outs`
-    * As an example, see `/figures/20240904_S1504_LCD_calibration.ipynb`
+    * I wrote .gitignore so that `fiures/outs` will not be commited to git.
+    * As an example, see `figures/20240904_S1504_LCD_calibration.ipynb`
 * No need to put all codes that were used for preprocessing (e.g. motion correction, spike sorting, etc). Only the scripts that generated the final figure should be posted here.
 * Ideally I want to assemble preprocessing codes in one place, but let's discuss it later.
 * I regard this as a draft repository. At the point of publication I plan to make another clean repository with all commit history erased. So please feel free to upload dirty codes and notebooks that might contain some personal information (like password for SSH? just kidding...).
