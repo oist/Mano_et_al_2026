@@ -30,7 +30,12 @@ mpl.rcParams.update({
     'font.family': 'sans-serif',
     'font.sans-serif': "Arial",
     'pdf.fonttype': 42,
-    'ps.fonttype': 42
+    'ps.fonttype': 42,
+    'axes.linewidth': 0.5,
+    'xtick.major.width': 0.5,
+    'xtick.minor.width': 0.5,
+    'ytick.major.width': 0.5,
+    'ytick.minor.width': 0.5,
 })
 ```
 
@@ -38,4 +43,5 @@ Explanation of the Code
 * Adding the Arial Font: The Arial TTF file is located at `/bucket/ReiterU/common/fonts/arial.ttf`. This path is provided to `matplotlib.font_manager` to ensure that Matplotlib can use the font.
 * Setting Default Font and Size: The configuration specifies Arial as the default font and sets the font size to **7**.
 * Ensuring Illustrator Compatibility: The pdf.fonttype and ps.fonttype are set to 42, which ensures the fonts are properly embedded and recognized when the PDF is imported into Illustrator.
+* Adjusting the tick and bounding box line widths: Here it uses **0.5** points, which should look nice on figures.
 * Even with this approach, I still have issues with greek letters, which are exported with default Dejavu-Sans font. It can be fixed, but the solution was convoluted and I want to stay away from it...
