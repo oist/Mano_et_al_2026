@@ -24,7 +24,6 @@ from matplotlib import font_manager
 import matplotlib as mpl
 
 font_manager.fontManager.addfont('/bucket/ReiterU/common/fonts/arial.ttf')
-
 mpl.rcParams.update({
     'font.size': 7,
     'font.family': 'sans-serif',
@@ -33,9 +32,13 @@ mpl.rcParams.update({
     'ps.fonttype': 42,
     'axes.linewidth': 0.5,
     'xtick.major.width': 0.5,
+    'xtick.major.size': 2,
+    'xtick.minor.size': 2,
     'xtick.minor.width': 0.5,
     'ytick.major.width': 0.5,
     'ytick.minor.width': 0.5,
+    'ytick.major.size': 2,
+    'ytick.minor.size': 2,
 })
 ```
 
