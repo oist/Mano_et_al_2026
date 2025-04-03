@@ -12,6 +12,10 @@
 * Let us also put the singularity images or conda environment files to run the code here.
     * As an example, see `/singularity/CaImAn/READMD.md`
 
+# Figure size and fonts
+* Figures (main and supplementary) should have 184 mm width, which is A4 size. Nature's two-column figures are around 185 mm size, so this should fit well. For one-column figures, use 92 mm.
+* Font style should be: Arial, 7 points
+
 # Guidelines for generating plots using matplotlib
 
 To ensure that `matplotlib` generates PDF files compatible with Adobe Illustrator (avoiding common issues like font recognition errors), it’s important to configure it properly. 
@@ -22,10 +26,11 @@ Below is a set of commands that have worked reliably in my experience. Add these
 ```python
 from matplotlib import font_manager
 import matplotlib as mpl
-
 font_manager.fontManager.addfont('/bucket/ReiterU/common/fonts/arial.ttf')
 mpl.rcParams.update({
     'font.size': 7,
+    'axes.titlesize': 7,
+    'legend.fontsize': 7,
     'font.family': 'sans-serif',
     'font.sans-serif': "Arial",
     'pdf.fonttype': 42,
