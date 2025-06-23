@@ -10,10 +10,6 @@ From: nvidia/cuda:11.3.1-cudnn8-devel-ubuntu20.04
     ./moving_least_squares /opt
 
 %post
-    # Configure SSH to avoid host key verification issues
-    echo "  StrictHostKeyChecking no" >> /root/.ssh/config
-    echo "  UserKnownHostsFile=/dev/null" >> /root/.ssh/config
-
     # to fix timezon info
     export DEBIAN_FRONTEND=noninteractive
     export TZ=Asia/Tokyo
