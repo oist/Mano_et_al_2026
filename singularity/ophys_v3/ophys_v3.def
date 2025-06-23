@@ -1,0 +1,90 @@
+BootStrap: docker
+From: nvidia/cuda:11.3.1-cudnn8-devel-ubuntu20.04
+
+%environment
+    TZ=Asia/Tokyo
+    DEBIAN_FRONTEND=noninteractive
+
+%files
+    ./buffertools3 /opt
+    ./moving_least_squares /opt
+
+%post
+    # Set the correct permissions for the SSH key; this is needed to access private GitHub repository
+    chmod 600 /root/.ssh/id_ecdsa
+
+    # Configure SSH to avoid host key verification issues
+    echo "  StrictHostKeyChecking no" >> /root/.ssh/config
+    echo "  UserKnownHostsFile=/dev/null" >> /root/.ssh/config
+
+    # to fix timezon info
+    export DEBIAN_FRONTEND=noninteractive
+    export TZ=Asia/Tokyo
+
+    apt-get update -y
+    apt-get install -y --no-install-recommends gcc g++ libgl1 nano wget curl git openssh-client tar gzip ca-certificates
+    apt-get install -y build-essential cmake ffmpeg
+
+    # install python3.10 amd pip
+    apt-get install -y software-properties-common
+    add-apt-repository -y ppa:deadsnakes/ppa
+    apt-get update -y
+    apt-get install -y python3.10
+    apt-get install -y python3.10-dev
+    curl -sS https://bootstrap.pypa.io/get-pip.py | python3.10
+    apt-get clean
+
+    ln -s /usr/bin/python3.10 /usr/bin/python
+
+    python3.10 -m pip install --upgrade setuptools wheel pip
+
+    # install caiman
+    cd /opt
+    git clone https://github.com/flatironinstitute/CaImAn
+    cd CaImAn/
+    # use the version on Dec 11 2025
+    git checkout 5a8a4dc8ef44dc0b53b132d4c8488b20daf7cd49
+    python3.10 -m pip install --no-binary opencv-python -r requirements.txt
+    python3.10 -m pip install .
+    #python3.10 caimanmanager.py install
+
+    # jupyter and interactive plot libraries
+    python3.10 -m pip install jupyter jupyterlab ipywidgets ipympl
+    # file IO
+    python3.10 -m pip install h5py zarr tifffile nibabel pynrrd roifile[all] npTDMS imagecodecs
+
+    # scientific libary
+    python3.10 -m pip install scikit-learn scikit-image numpy scipy pandas tables
+
+    # plotting
+    python3.10 -m pip install matplotlib seaborn
+
+    # suite2p and cell detection
+    python3.10 -m pip install suite2p shapely alphashape numpy-hilbert-curve
+
+    # libraries used in opticflow
+    python3.10 -m pip install tqdm scikit-video
+
+    # for umap and clustering
+    python3.10 -m pip install 'scanpy[leiden]'
+    python3.10 -m pip uninstall -y typing_extensions
+    python3.10 -m pip install typing_extensions==4.11.0
+    python3.10 -m pip install scikit-posthocs
+
+    # install buffertools3 and moving_least_squares package
+    python3.10 -m pip install Cython
+    cd /opt/buffertools3
+    python3.10 -m pip install .
+    cd /opt/moving_least_squares
+    python3.10 -m pip install .
+
+    # pointpats for spatial distribution analysis
+    python3.10 -m pip install pointpats
+    python3.10 -m pip install squidpy
+
+    rm -f /root/.ssh/id_ecdsa
+
+    python3.10 -m pip cache purge
+
+%runscript
+    jupyter lab --ip=0.0.0.0 --port=8888 --no-browser --notebook-dir=/workdir --NotebookApp.iopub_data_rate_limit=1.0e10
