@@ -4,7 +4,6 @@ From: nvidia/cuda:11.3.1-cudnn8-devel-ubuntu20.04
 %environment
     TZ=Asia/Tokyo
     DEBIAN_FRONTEND=noninteractive
-    PYTHONPATH=/opt/pynwb_site:$PYTHONPATH
 
 %files
     ./buffertools3 /opt
@@ -40,10 +39,6 @@ From: nvidia/cuda:11.3.1-cudnn8-devel-ubuntu20.04
     python3.10 -m pip install --no-binary opencv-python -r requirements.txt
     python3.10 -m pip install .
     #python3.10 caimanmanager.py install
-
-    # pynwb installed by CaImAn has issues; reinstall it here
-    mkdir -p /opt/pynwb_site
-    python3.10 -m pip install --target=/opt/pynwb_site pynwb
 
     # jupyter and interactive plot libraries
     python3.10 -m pip install jupyter jupyterlab ipywidgets ipympl

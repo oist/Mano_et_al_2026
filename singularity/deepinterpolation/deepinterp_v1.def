@@ -1,0 +1,30 @@
+BootStrap: docker
+From: tensorflow/tensorflow:2.10.0-gpu
+
+%environment
+    TZ=Asia/Tokyo
+    DEBIAN_FRONTEND=noninteractive
+
+%post
+    # to fix timezon info
+    export DEBIAN_FRONTEND=noninteractive
+    export TZ=Asia/Tokyo
+
+    apt-get update -y
+    apt-get install -y --no-install-recommends gcc g++ nano wget curl git openssh-client tar gzip ca-certificates
+    apt-get install -y build-essential cmake
+
+    python -m pip install --upgrade pip
+
+    # install deepinterpolation
+    cd /opt
+    git clone https://github.com/AllenInstitute/deepinterpolation.git
+    cd deepinterpolation
+    make init
+    python -m pip install .
+
+    # additional libraries
+    python -m pip install jupyterlab
+
+%runscript
+    jupyter lab --ip=0.0.0.0 --port=8888 --no-browser --allow-root --notebook-dir=/workdir --NotebookApp.iopub_data_rate_limit=1.0e10
