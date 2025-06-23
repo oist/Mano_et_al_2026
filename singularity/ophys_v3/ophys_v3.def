@@ -10,9 +10,6 @@ From: nvidia/cuda:11.3.1-cudnn8-devel-ubuntu20.04
     ./moving_least_squares /opt
 
 %post
-    # Set the correct permissions for the SSH key; this is needed to access private GitHub repository
-    chmod 600 /root/.ssh/id_ecdsa
-
     # Configure SSH to avoid host key verification issues
     echo "  StrictHostKeyChecking no" >> /root/.ssh/config
     echo "  UserKnownHostsFile=/dev/null" >> /root/.ssh/config
