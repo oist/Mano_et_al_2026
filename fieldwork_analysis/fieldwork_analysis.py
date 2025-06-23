@@ -240,7 +240,7 @@ def align_images_sift(curr_h, curr_v, num_matches_to_draw=50, visualize=True):
 
     return aligned_v, M, mask
 
-#%%
+#%% Get DoLP and intensity data from raw images
 
 #need to shift the images, click on center of the square in all images, align vert/horiz to that
 
@@ -259,8 +259,6 @@ dataset_paths=['/home/sam/bucket/Gio/Polarization/pol-ccard_depth-dist/20250328-
                '/home/sam/bucket/Gio/Polarization/pol-ccard_depth-dist/20250503-shimp-on-transect/reverse/' ]
 
 
-
-data_path='/home/sam/bucket/Gio/Polarization/pol-ccard_depth-dist/20250325_temp_folder/'
 dataf=pd.read_csv(glob.glob(data_path + '*data.csv')[0])
 
 dataf[['date', 'z', 'm']] = dataf['name_tag'].str.extract(r'(\d{8})-(\d+)z(\d+)m')
@@ -386,7 +384,7 @@ print("✅ processing finished →", len(all_int), "intensity points")
 
 
     
-    #%%
+#%% Calculate information of interest from field data
     
 dataset_paths=['/home/sam/bucket/Gio/Polarization/pol-ccard_depth-dist/20250501-depth-cloudy/series1/',
                '/home/sam/bucket/Gio/Polarization/pol-ccard_depth-dist/20250501-depth-cloudy/series1/reverse/',
@@ -542,11 +540,7 @@ for data_path in dataset_paths:
         h5f.create_dataset("h_bg",           data=np.asarray(h_bg))
         
 
-#%%
-
-"""
-Box-plots of DoLP_BG with black styling and filled-circle outliers.
-"""
+#%% DoLP background (EDF 13a)
 
 import os, glob, h5py
 import numpy as np
@@ -614,14 +608,14 @@ plt.tight_layout()
 plt.savefig('dolp_bg.pdf', dpi=600)
 plt.show()
 
-#%% dolp image of white standard
+#%% dolp image of white standard (EDF 13b)
 
 
 
 file='/home/sam/bucket/Gio/Polarization/pol-ccard_depth-dist/20250503-shimp-on-transect/20250503-06z03m02_raw.npy'
 all_imgs = np.load(file)
-dolp_img=both_imgs[0]
-int_img=both_imgs[1]
+dolp_img=all_imgs[0]
+int_img=all_imgs[1]
 
 
 dolp_crop = dolp_img[400:900,500:1500]
@@ -670,7 +664,6 @@ fig.colorbar(im2, ax=ax[2], orientation='horizontal',
              shrink=0.8, pad=0.08)
 
 
-
 for a in ax:
     a.set_xticks([]); a.set_yticks([])
 
@@ -683,7 +676,7 @@ plt.show()
 
 
 
-#%% Extended Data block of data
+#%% Extended Data block of field data (EDF 13c-l)
 
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
@@ -706,15 +699,6 @@ from  scipy.optimize import curve_fit
 # ───────────────────────────────────────────────────────────────
 # Helpers
 # ───────────────────────────────────────────────────────────────
-def pol_dist_deg(DoLP, AoP_deg, bg_DoLP, bg_AoP_deg,
-                 tau=0.059, omega_deg=1.0):
-    Δp  = DoLP - bg_DoLP
-    Δφ  = np.abs(AoP_deg - bg_AoP_deg)
-    Δφ  = np.where(Δφ > 90, 180 - Δφ, Δφ)
-    p̄   = 0.5 * (DoLP + bg_DoLP)
-    return np.sqrt((Δp / tau) ** 2 +
-                   (2 * p̄ * np.sin(np.deg2rad(Δφ)) /
-                    np.deg2rad(omega_deg)) ** 2)
 
 def fit_exp(x, y, p0=(0.3, 0.1)):
     popt, _ = curve_fit(lambda d, A, k: A * np.exp(-k * d),
@@ -851,17 +835,7 @@ print('\nSaved → gio_combined_2x5.pdf  and  sighting_distances.csv')
 
 
 
-#%% DoLP shrimp
-
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-Polarisation-distance analysis of a shrimp image.
-
-Replaces DoLP Weber contrast with Martin How polarisation distance (PD):
-PD² = (ΔDoLP/τ)² + (2·D̄·sinΔAoP/ω)²
-where τ and ω are the psychophysical JNDs for DoLP and AoP.
-"""
+#%% DoLP shrimp image (Fig. 5j)
 
 import numpy as np
 import cv2
@@ -869,9 +843,7 @@ import glob
 import matplotlib.pyplot as plt
 from pathlib import Path
 
-# ---------------------------------------------------------------------
-# 0)  User-tweakable parameters
-# ---------------------------------------------------------------------
+
 tau    = 0.059                       # DoLP JND (fraction, 0.05 = 5 %)
 omega  = np.deg2rad(5.0)            # AoP JND (radians, 2° default)
 crop   = (slice(560, 710), slice(760, 1190))   # crop for display maps
@@ -897,9 +869,6 @@ aligned_d_tmp, Md, mask = align_images_sift(scaled_h, scaled_d, num_matches_to_d
 aligned_d = cv2.warpPerspective(curr_d, Md, (curr_h.shape[1], curr_h.shape[0]))
 
 
-# ---------------------------------------------------------------------
-# 3)  Stokes parameters, DoLP & AoP
-# ---------------------------------------------------------------------
 epsilon = 1e-8
 S0 = curr_h + aligned_v
 S1 = curr_h - aligned_v
@@ -911,16 +880,12 @@ AoP  = 0.5 * np.arctan2(S2, S1)             # radians, −π/2 … π/2
 # Intensity image (mean of the two analyser channels)
 int_img = S0 / 2
 
-# ---------------------------------------------------------------------
-# 4)  Background statistics
-# ---------------------------------------------------------------------
+
 bkg_int  = np.mean(int_img[bkg_sl])
 bkg_dolp = np.mean(DoLP[bkg_sl])
 bkg_aop  = np.mean(AoP[bkg_sl])
 
-# ---------------------------------------------------------------------
-# 5)  Polarisation distance (Martin How 2014)
-# ---------------------------------------------------------------------
+
 delta_DoLP = DoLP - bkg_dolp
 
 mask = (delta_DoLP > -0.059) & (delta_DoLP < 0.177)
@@ -935,9 +900,6 @@ PD    = np.sqrt(PD_sq)
 
 weber_int = (int_img  - bkg_int)  / bkg_int
 weber_int[np.abs(weber_int)<0.118]=0
-# ---------------------------------------------------------------------
-# 6)  Shrimp mask & stats
-# ---------------------------------------------------------------------
 shrimp_mask=cv2.imread('/home/sam/bucket/Gio/Polarization/pol-ccard_depth-dist/20250503-shimp-on-transect/raws/shrimp/extras/mask_image.jpg',0)
 shrimp_mask=shrimp_mask>0
 
@@ -945,23 +907,6 @@ ddolp_vals     = delta_DoLP[shrimp_mask]
 
 print(f"Mean polarisation distance (shrimp vs bkg): delta_dolp = {ddolp_vals.mean():.2f}")
 
-# # ---------------------------------------------------------------------
-# # 7)  Histogram inside the shrimp mask
-# # ---------------------------------------------------------------------
-# plt.figure(figsize=(6,4))
-# plt.hist(ddolp_vals, bins=50, density=True, color='purple',
-#          alpha=0.6, edgecolor='black')
-# plt.axvline(1.0, color='k', ls='--', lw=1)
-# plt.xlabel('delta dolp')
-# plt.ylabel('Probability density')
-# plt.title('Shrimp PD histogram (τ=5 %, ω=2°)')
-# plt.tight_layout()
-# plt.savefig('shrimp_PD_histogram.pdf', dpi=600)
-# plt.show()
-
-# ---------------------------------------------------------------------
-# 8)  Map visualisation (crop)
-# ---------------------------------------------------------------------
 # ---------------------------------------------------------------------
 fig, ax = plt.subplots(3, 1, figsize=(9, 4))
 
@@ -992,7 +937,6 @@ fig.colorbar(im2, ax=ax[2], orientation='horizontal',
              shrink=0.8, pad=0.08)
 
 
-
 for a in ax:
     a.set_xticks([]); a.set_yticks([])
 
@@ -1001,20 +945,10 @@ plt.savefig('shrimp_dolp_map.pdf', dpi=600)
 plt.show()
 
 
-#%% 
-
-"""
-Distance-vs-Value plots + sighting-distance table
-─────────────────────────────────────────────────
-* Figure 1 – Weber metrics (|value|, red line at +0.118)
-* Figure 2 – Other metrics (|value|, red line at +0.059)
-* Table   – distance where the exponential fit reaches the
-            relevant detection threshold for every metric
-"""
+#%% Fig 5i
 
 import math
 from pathlib import Path
-
 import numpy  as np
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -1151,3 +1085,8 @@ print("────────────────────────�
 out_csv = csv_path.with_name("sighting_distances_per_metric.csv")
 table_df.to_csv(out_csv, index=False)
 print(f"Table saved → {out_csv}")
+
+
+
+
+
