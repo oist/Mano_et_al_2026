@@ -4,13 +4,13 @@ From: nvidia/cuda:11.3.1-cudnn8-devel-ubuntu20.04
 %environment
     TZ=Asia/Tokyo
     DEBIAN_FRONTEND=noninteractive
+    PYTHONPATH=/opt/pynwb_site:$PYTHONPATH
 
 %files
     ./buffertools3 /opt
     ./moving_least_squares /opt
 
 %post
-    # to fix timezon info
     export DEBIAN_FRONTEND=noninteractive
     export TZ=Asia/Tokyo
 
@@ -40,6 +40,10 @@ From: nvidia/cuda:11.3.1-cudnn8-devel-ubuntu20.04
     python3.10 -m pip install --no-binary opencv-python -r requirements.txt
     python3.10 -m pip install .
     #python3.10 caimanmanager.py install
+
+    # pynwb installed by CaImAn has issues; reinstall it here
+    mkdir -p /opt/pynwb_site
+    python3.10 -m pip install --target=/opt/pynwb_site pynwb
 
     # jupyter and interactive plot libraries
     python3.10 -m pip install jupyter jupyterlab ipywidgets ipympl
@@ -75,7 +79,7 @@ From: nvidia/cuda:11.3.1-cudnn8-devel-ubuntu20.04
     python3.10 -m pip install pointpats
     python3.10 -m pip install squidpy
 
-    rm -f /root/.ssh/id_ecdsa
+    rm -rf /usr/local/lib/python3.10/dist-packages/pynwb*
 
     python3.10 -m pip cache purge
 
