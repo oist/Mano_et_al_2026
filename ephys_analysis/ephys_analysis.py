@@ -180,7 +180,7 @@ for curr_ephys_path in curr_ephys_paths:
         np.save(sn_exp['analysis_path'] + f'/probe_{probe}_psth0.npy',all_psth0)
 
 
-#%% SN lum pol mix
+#%% SN lum pol mix (Fig. 5a,b)
 
 
 curr_ephys_paths=['/home/sam/bucket/electrophysiology/squidOL/2025_01_17/',
@@ -314,8 +314,7 @@ for curr_ephys_path in curr_ephys_paths:
     
 
 
-#%% Example pol receptive field, RF size and pos correlations. Presence of RF for pol drop vs increase
-#try using the DG for on-off pol and for horiz/vert responses
+#%% Example pol receptive field, RF size and pos correlations. (Fig. 5a,b) 
 
 #dim0=int
 #dim1=horiz_pol
@@ -671,7 +670,6 @@ plt.savefig('degree_ind.pdf', dpi=600)
 
 
 #%% RF example
-#kostas' screen is 125x70
 
 a=np.load('/home/sam/bucket/electrophysiology/squidOL/2025_03_07/2025_03_07_rec02_SN_POL_VER_SCREEN/analysis_folder/probe_0_etas0.npy')
 c=np.load('/home/sam/bucket/electrophysiology/squidOL/2025_03_07/2025_03_07_rec03_SN_LUM_POL_MIX/analysis_folder/probe_0_etas0.npy')
@@ -828,7 +826,7 @@ black_paths=['/home/sam/bucket/electrophysiology/squidOL/2025_01_10/',
              '/home/sam/bucket/electrophysiology/squidOL/2025_03_13/']
 
 
-#%%  DG analysis
+#%%  DG analysis (Fig. 5c, EDF 12a-c)
 
 exp_type='BLACK' 
 plot=0
@@ -1014,7 +1012,7 @@ if exp_type=='POL':
 else:
     plt.savefig('contrast_res.pdf',dpi=600)
 
-#%% example psths
+#%% example psths (Fig. 5c)
 
 # exp_name='/home/sam/bucket/electrophysiology/squidOL/2024_11_12/2024_11_12_rec03_DG_POL_HOR_SCREEN/'
 # probe=0
@@ -1119,7 +1117,7 @@ if exp_type == 'GRAY':
     plt.savefig('gray_ex.pdf',dpi=600)
 else:
     plt.savefig('pol_ex.pdf',dpi=600)
-#%% Contrast sensitivity to black. As above, but pooling over different datasets
+#%% Contrast sensitivity to black. As above, but pooling over different datasets (EDF 12c)
 
 #-2025_02_04 ND1 filter (90%)
 #-2025_02_06 used only red lights. Experiment didn't work well, don't use.
@@ -1177,7 +1175,7 @@ plt.show()
 plt.savefig('black_contrast_thresh.pdf', bbox_inches='tight', transparent=True)
 
 
-#%% POL/Int bar
+#%% POL/Int bar (Fig. 5e-h)
 
 
 import glob
@@ -1431,7 +1429,7 @@ plt.show()
 
 
 
-#%%
+#%% Fig 5f
 """
 Consensus-Leiden clustering of neuronal response matrices
 ---------------------------------------------------------
@@ -1458,14 +1456,7 @@ N_CONS_RUNS     = 1       # how many Leiden runs for consensus
 HD_K_NEIGHBOURS = 25       # neighbours for high-D k-NN graph
 CONS_THRESHOLD  = 0.5      # keep edges seen in ≥ 50 % of runs
 UMAP_NEIGHBORS = 25
-# ───────────────────────────  DATA IN  ──────────────────────────────
-# ---- You already have these objects in memory ---------------------
-# all_neurons            : (n_neurons, R1, R2)  raw (or norm’d) responses
-# all_neurons_norm       : same shape, 0–1 normalised
-# intensity_bin_centers  : 1-D (R1,)   Michelson contrast centres
-# polarization_bin_centers : 1-D (R2,) ΔDoLP centres
-# imshow_int_pol(mat, inten_bins, pol_bins, **kw) -> helper to plot
-# -------------------------------------------------------------------
+
 
 # ───────────────────  1. PRE-PROCESS & GLOBAL SEEDS  ────────────────
 np.random.seed(RNG_SEED)
@@ -1650,7 +1641,8 @@ plt.savefig('cluster_random_neurons.pdf', dpi=300)
 plt.show()
 
 
-#%%
+#%% Additive model
+
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
@@ -1789,7 +1781,7 @@ plt.show()
 
 
 
-#%% Generate RFs for LFP from sparse noise experiments
+#%% Generate RFs for LFP from sparse noise experiments (EDF 11)
 
 
 data_folder='/home/sam/Pictures/vision_figs/'

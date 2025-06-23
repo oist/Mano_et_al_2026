@@ -303,130 +303,9 @@ alphabet_colors = [
     "#FFE100", "#FF5005"
 ]
 
-#%% Good coronal section
-
-sl = 119820
-
-tmp = []
-for i in range(4):
-    tmp.append(io.imread(f"/home/sam/bucket/DBS/data/20231018_F24_squid_33dph_TO_PRO_3_alpha_tubulin/stitched_692BP/RES(10609x9316x1336)/624550_266910_{sl+25*i}.tif"))
-img1 = np.array(tmp).max(axis=0)
-
-tmp = []
-for i in range(4):
-    tmp.append(io.imread(f"/home/sam/bucket/DBS/data/20231018_F24_squid_33dph_TO_PRO_3_alpha_tubulin/stitched_624BP/RES(10609x9316x1336)/624550_266910_{sl+25*i}.tif"))
-img2 = np.array(tmp).max(axis=0)
 
 
-raw = np.stack((img1, img2))
-print(raw.shape)
-
-cropped = raw[:, 800:9000, 2250:8800]
-raw2 = []
-for i in range(2):
-    raw2.append(transform.rotate(cropped[i], -105, resize=True, preserve_range=True))
-raw2 = np.array(raw2)
-raw2 = raw2[:, 1300:7200, 200:-200]
-
-gamma = 1.5
-vmax1, vmin1 = 4000, 500
-vmax2, vmin2 = 25000, 500
-img = np.power(raw2[:, ::1, ::1], 1/gamma)
-nuclear_norm = np.clip((img[0] - np.power(vmin1, 1/gamma)) / (np.power(vmax1, 1/gamma) - np.power(vmin1, 1/gamma)), 0, 1)
-tubulin_norm = np.clip((img[1] - np.power(vmin2, 1/gamma)) / (np.power(vmax2, 1/gamma) - np.power(vmin2, 1/gamma)), 0, 1)
-
-cm1 = plt.get_cmap('Blues')
-colors = cm1(np.linspace(0, 0.7, 256))
-colors[0] = (1,1,1,1)
-interted_cm1 = ListedColormap(1 - colors[:, :3])
-
-cm2 = plt.get_cmap('Reds')
-colors = cm2(np.linspace(0.0, 0.8, 256))
-colors[0] = (1,1,1,1)
-inverted_cm2 = ListedColormap(1 - colors[:, :3])
-
-nuclear_rgb = interted_cm1(nuclear_norm)[..., :3]
-tubulin_rgb = inverted_cm2(tubulin_norm)[..., :3]
-
-overlay = nuclear_rgb + tubulin_rgb
-overlay = np.clip(overlay, 0, 1)
-inverted = 1 - overlay
-
-plt.imshow(inverted[500:3000,3000:3500,:])
-
-# Show
-import matplotlib.pyplot as plt
-from matplotlib.patches import Rectangle
-import matplotlib.font_manager as fm
-import numpy as np
-
-x, y, w, h = 2370, 250, 800, 2900   # adjust as needed
-
-fig, (ax_main, ax_zoom) = plt.subplots(
-    1, 2,
-    dpi=500,
-    figsize=(4, 2),
-    gridspec_kw={'width_ratios': [1, 0.45]}
-)
-fig.subplots_adjust(wspace=0.02)   # gap between panels
-
-# ------------------------------------------------------------------
-# MAIN IMAGE  ───────────────────────────────────────────────────────
-# ------------------------------------------------------------------
-ax_main.imshow(inverted, cmap='gray')
-ax_main.axis('off')
-
-# Rectangle marking zoom region
-rect = Rectangle((x, y), w, h, linewidth=1, edgecolor='red', facecolor='none')
-ax_main.add_patch(rect)
-
-# Scale‑bar for main image (500 µm)
-real_length_um = 500      # printed length
-pixel_size_um  = 0.65     # µm per pixel
-fontprops      = fm.FontProperties(size=6)
-
-scalebar_main = AnchoredSizeBar(ax_main.transData,
-                                real_length_um / pixel_size_um,
-                                f'{real_length_um} µm',
-                                loc='lower left',
-                                pad=0.2,
-                                color='black',
-                                frameon=False,
-                                size_vertical=10,
-                                fontproperties=fontprops)
-ax_main.add_artist(scalebar_main)
-
-# ------------------------------------------------------------------
-# ZOOMED‑IN VIEW  ───────────────────────────────────────────────────
-# ------------------------------------------------------------------
-zoomed_img = inverted[y:y + h, x:x + w]
-ax_zoom.imshow(zoomed_img, cmap='gray')
-ax_zoom.axis('off')
-ax_zoom.set_aspect('equal')   # fill the narrower panel
-
-# Scale‑bar for zoomed image (100 µm)
-real_length_zoom_um = 100
-scalebar_zoom = AnchoredSizeBar(ax_zoom.transData,
-                                real_length_zoom_um / pixel_size_um,
-                                f'{real_length_zoom_um} µm',
-                                loc='lower left',
-                                pad=0.2,
-                                color='black',
-                                frameon=False,
-                                size_vertical=10,
-                                fontproperties=fontprops)
-ax_zoom.add_artist(scalebar_zoom)
-
-# ------------------------------------------------------------------
-# SAVE & SHOW  ──────────────────────────────────────────────────────
-# ------------------------------------------------------------------
-plt.savefig("OL_medulla_anatamy.pdf", bbox_inches='tight', transparent=True)
-plt.show()
-
-
-
-
-#%% tree branch volume with depth
+#%% tree branch volume with depth (Fig. 3c)
 
 # turn to a loop over datasets. This calculates island volume as a function of distanct from the iGL, its repeatable
 
@@ -534,7 +413,7 @@ plt.savefig('treeGrowth.pdf', bbox_inches='tight', transparent=True)
 
 
 
-#%% comparing islands after warping
+#%% comparing islands after warping (Fig. 3b)
 
 atlas_10, _ = nrrd.read('/home/sam/bucket/DBS/atlas/S_lessoniana_OL_v0.3/segmentation/Segmentation.seg.nrrd')
 atlas_10 = np.swapaxes(atlas_10, 0, 2)
@@ -660,7 +539,7 @@ plt.show()
 plt.savefig('non_repeating_islands.pdf', bbox_inches='tight', transparent=True)
 
 
-#%% New diI injection analysis
+#%% diI injection analysis (Fig. 3h)
 import napari
 import numpy as np
 from scipy.ndimage import gaussian_filter
@@ -1089,17 +968,8 @@ plot_polar_histogram(hist, r_edges, th_edges, px_per_um=0.2)
 
 plt.savefig('injection_spread_' + call_sign + '.pdf', bbox_inches='tight', transparent=True)
 
-# viewer = napari.Viewer()
-# viewer.add_image(blob_img, name='Mask 3D') 
-# viewer.add_image(tracer, name='Mask 3D') 
-# napari.run()
 
-# viewer = napari.Viewer()
-# viewer.add_image(rv, name='Mask 3D')  # or viewer.add_image if it's not binary
-# napari.run()
-
-
-#%% Rudi single neurons
+#%% Single neurons (Fig. 3e,f)
 
 """
 Polar scatter of cell processes.

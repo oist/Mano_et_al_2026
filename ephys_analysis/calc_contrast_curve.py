@@ -6,6 +6,8 @@ Created on Thu Apr  3 10:34:19 2025
 @author: sam
 """
 
+#generate contrast response curves and thresolds for intensity and DoLP stimulus sets. Uses population data generated from ephys_analysis.py
+
 import numpy as np
 from scipy.ndimage import gaussian_filter
 from sklearn.model_selection import KFold
@@ -14,7 +16,7 @@ import matplotlib.pyplot as plt
 from scipy.stats import sem, wilcoxon
 from sklearn.decomposition import PCA
 
-# Custom one-sided Wilcoxon test that handles all-identical data
+
 def wilcoxon_one_sided_greater(x):
     """
     Returns a one-sided p-value for the hypothesis: median(x) > 0.
@@ -40,6 +42,7 @@ def wilcoxon_one_sided_greater(x):
             return 1.0
 
  
+
 
 
 
@@ -244,7 +247,7 @@ plt.tight_layout()
 plt.show()
 
 
-# ----------- single, authoritative report -----------------
+
 if exp_type == 'POL':
     print(f"Negative DoLP threshold  = {neg_thresh:.3f}")
     print(f"Positive DoLP threshold = {pos_thresh:.3f}")
