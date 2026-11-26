@@ -1,38 +1,49 @@
-# squid_vision_paper_draft
+# Mano_et_al_2026
 
-# What is this?
-* Lorenz did a fantastic job in sharing codes when he published Nature 2023 paper (See https://gitlab.mpcdf.mpg.de/mpibr/laur/inter-hemispheric-rem). I want to follow his approach in our paper.
-* The aim is to post all codes and jupyter notebooks that was used to generate figures here.
-    * Assume that you will save all outputs in `figures/outs`
-    * I wrote .gitignore so that `fiures/outs` will not be commited to git.
-    * As an example, see `figures/20240904_S1504_LCD_calibration.ipynb`
-* No need to put all codes that were used for preprocessing (e.g. motion correction, spike sorting, etc). Only the scripts that generated the final figure should be posted here.
-* Ideally I want to assemble preprocessing codes in one place, but let's discuss it later.
-* I regard this as a draft repository. At the point of publication I plan to make another clean repository with all commit history erased. So please feel free to upload dirty codes and notebooks that might contain some personal information (like password for SSH? just kidding...).
-* Let us also put the singularity images or conda environment files to run the code here.
-    * As an example, see `/singularity/CaImAn/READMD.md`
+Analysis code and figure-generation notebooks for Mano et al. (2026), a study of squid vision. The repository covers calcium imaging and electrophysiology of the squid visual system, optic-lobe anatomy, and measurements of light intensity and polarization in the field.
 
-# Figure size and fonts
-* Figures (main and supplementary) should have 184 mm width, which is A4 size. Nature's two-column figures are around 185 mm size, so this should fit well. For one-column figures, use 92 mm.
-* Font style should be: Arial, 7 points
+## Start here with the toy data and analysis
 
-# Guidelines for generating plots using matplotlib
+The toy dataset and analysis are in [`ephys_analysis/Example_Code/`](ephys_analysis/Example_Code/). Open [`EXAMPLE_CODE_RF_ANALYSIS.ipynb`](ephys_analysis/Example_Code/EXAMPLE_CODE_RF_ANALYSIS.ipynb) to see how spike times from a single probe are aligned to sparse-noise stimulus frames. The notebook builds ON and OFF receptive-field maps, plots peristimulus time histograms, and estimates receptive-field centers and sizes. The analysis functions are in [`RF_FUNCTIONS.py`](ephys_analysis/Example_Code/RF_FUNCTIONS.py).
 
-To ensure that `matplotlib` generates PDF files compatible with Adobe Illustrator (avoiding common issues like font recognition errors), it’s important to configure it properly. 
+| Bundled data file | Contents |
+| --- | --- |
+| [`spike_t_matrix.npy`](ephys_analysis/Example_Code/spike_t_matrix.npy) | Spike times in seconds for 24 units |
+| [`g_ids.npy`](ephys_analysis/Example_Code/g_ids.npy) | Unit IDs in the same order as the spike-time array |
+| [`g_channels.npy`](ephys_analysis/Example_Code/g_channels.npy) | Peak probe channel for each unit |
+| [`stim_windows.npy`](ephys_analysis/Example_Code/stim_windows.npy) | Start and end times in seconds for the stimulus frames |
 
-Below is a set of commands that have worked reliably in my experience. Add these lines at the beginning of your script to produce PDFs that import beautifully into Illustrator.
- If you encounter any issues, feel free to reach out.
+**Required to rerun the example.** The notebook also reads `sparse_noise_matrix.npy`, which contains the sparse-noise frames corresponding to `stim_windows.npy`. The stimulus matrix is missing from this repository. With the matching file in `ephys_analysis/Example_Code/`, open the notebook in Jupyter with that directory as the working directory. The Python dependencies are NumPy, SciPy, pandas, Matplotlib, scikit-image, and tqdm.
+
+## Paper analyses and supporting code
+
+| Location | Contents |
+| --- | --- |
+| [`ephys_analysis/`](ephys_analysis/) | Electrophysiology analyses and plots, including [receptive-field mapping and property extraction](ephys_analysis/Receptive_Field_Analysis/), [direction selectivity](ephys_analysis/Direction_Selectivity_Analysis/), and [unit-quality plots and SpikeGLX file readers](ephys_analysis/Ephys_Processing/). The [figure script](ephys_analysis/ephys_analysis.py) also covers contrast sensitivity, polarization responses, and local field potentials. The [atlas notebook](ephys_analysis/ATLAS_SUPP_PLOTS.ipynb) generates supplementary atlas plots. |
+| [`calcium_analysis/`](calcium_analysis/) | Recording-level and summary notebooks for the optic lobe’s outer and inner granular layers (OGL and IGL). These cover receptive fields and retinotopy ([OGL](calcium_analysis/OGL_receptive_field/), [IGL](calcium_analysis/IGL_receptive_field/)), direction and orientation selectivity ([OGL](calcium_analysis/DS_OS_OGL/), [IGL](calcium_analysis/DS_OS_IGL/)), [response clustering](calcium_analysis/OGL_IGL_clustering/), [spontaneous activity](calcium_analysis/OGL_IGL_spontaneous_activity/), and [IGL activity waves](calcium_analysis/IGL_wave/). This directory also includes [supplementary movie notebooks](calcium_analysis/sup_movies/). |
+| [`calcium_scripts/`](calcium_scripts/) | Python and Slurm jobs for [motion correction and DeepInterpolation denoising](calcium_scripts/preprocessing/README.md), [cell detection and ΔF/F extraction](calcium_scripts/ROI_detection/README.md), and [ImageJ ROI and file-conversion utilities](calcium_scripts/utils/). |
+| [`anatomical_analysis/`](anatomical_analysis/) | Analysis of optic-lobe image volumes, including segmentation, layer organization, dye injections, and single-neuron reconstructions. |
+| [`fieldwork_analysis/`](fieldwork_analysis/) | Image processing and analysis for field measurements of intensity and polarization, with tools for drawing contours and marking points. |
+| [`monitor_cal.ipynb`](monitor_cal.ipynb) | Display calibration and plotting. Additional [LCD calibration and calcium-response notebooks](calcium_analysis/sup_calcium_LCD/) are under `calcium_analysis/`. |
+| [`singularity/`](singularity/) | Container definitions and build instructions for [calcium imaging analysis](singularity/ophys_v3/README.md) and [DeepInterpolation](singularity/deepinterpolation/README.md). |
+
+Many paper analyses reference recordings and intermediate files on OIST lab storage. Running those workflows requires access to the corresponding inputs and updating the data and cluster paths for your environment.
+
+## Figure formatting
+
+Use widths of 184 mm for two-column figures and 92 mm for single-column figures, with 7-point Arial. The Matplotlib settings below embed TrueType fonts for editing PDFs in Adobe Illustrator. Replace the font path with the location of Arial on your system.
 
 ```python
 from matplotlib import font_manager
 import matplotlib as mpl
+
 font_manager.fontManager.addfont('/bucket/ReiterU/common/fonts/arial.ttf')
 mpl.rcParams.update({
     'font.size': 7,
     'axes.titlesize': 7,
     'legend.fontsize': 7,
     'font.family': 'sans-serif',
-    'font.sans-serif': "Arial",
+    'font.sans-serif': 'Arial',
     'pdf.fonttype': 42,
     'ps.fonttype': 42,
     'axes.linewidth': 0.5,
@@ -41,15 +52,8 @@ mpl.rcParams.update({
     'xtick.minor.size': 2,
     'xtick.minor.width': 0.5,
     'ytick.major.width': 0.5,
-    'ytick.minor.width': 0.5,
     'ytick.major.size': 2,
     'ytick.minor.size': 2,
+    'ytick.minor.width': 0.5,
 })
 ```
-
-Explanation of the Code
-* Adding the Arial Font: The Arial TTF file is located at `/bucket/ReiterU/common/fonts/arial.ttf`. This path is provided to `matplotlib.font_manager` to ensure that Matplotlib can use the font.
-* Setting Default Font and Size: The configuration specifies Arial as the default font and sets the font size to **7**.
-* Ensuring Illustrator Compatibility: The pdf.fonttype and ps.fonttype are set to 42, which ensures the fonts are properly embedded and recognized when the PDF is imported into Illustrator.
-* Adjusting the tick and bounding box line widths: Here it uses **0.5** points, which should look nice on figures.
-* Even with this approach, I still have issues with greek letters, which are exported with default Dejavu-Sans font. It can be fixed, but the solution was convoluted and I want to stay away from it...
