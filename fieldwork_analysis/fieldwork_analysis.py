@@ -1,4 +1,5 @@
-#!/usr/bin/env python3
+#%%
+# #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
 Created on Mon Oct 21 14:33:20 2024
@@ -16,6 +17,11 @@ import os
 import re
 import h5py
 from scipy.ndimage import label, center_of_mass
+from pathlib import Path
+
+fieldwork_data_dir = Path.home() / 'bucket/ReiterU/Gio/Polarization/pol-ccard_depth-dist'
+if not fieldwork_data_dir.is_dir():
+    fieldwork_data_dir = Path('/bucket/ReiterU/Gio/Polarization/pol-ccard_depth-dist')
 
 
 # ---------------------------------------------------------------------
@@ -244,21 +250,23 @@ def align_images_sift(curr_h, curr_v, num_matches_to_draw=50, visualize=True):
 
 #need to shift the images, click on center of the square in all images, align vert/horiz to that
 
-dataset_paths=['/home/sam/bucket/Gio/Polarization/pol-ccard_depth-dist/20250328-back-forth/',
-               '/home/sam/bucket/Gio/Polarization/pol-ccard_depth-dist/20250328-back-forth/Reverse/',
-               '/home/sam/bucket/Gio/Polarization/pol-ccard_depth-dist/20250404_temp/',
-               '/home/sam/bucket/Gio/Polarization/pol-ccard_depth-dist/20250404_temp/Reverse/',
-               '/home/sam/bucket/Gio/Polarization/pol-ccard_depth-dist/20250408/',
-               '/home/sam/bucket/Gio/Polarization/pol-ccard_depth-dist/20250417/',
-               '/home/sam/bucket/Gio/Polarization/pol-ccard_depth-dist/20250430/dive1/series1/',
-               '/home/sam/bucket/Gio/Polarization/pol-ccard_depth-dist/20250430/dive1/series1/reverse/',
-               '/home/sam/bucket/Gio/Polarization/pol-ccard_depth-dist/20250501-depth-cloudy/series1/',
-               '/home/sam/bucket/Gio/Polarization/pol-ccard_depth-dist/20250501-depth-cloudy/series1/reverse/',
-               '/home/sam/bucket/Gio/Polarization/pol-ccard_depth-dist/20250502-depth-sunny/',
-               '/home/sam/bucket/Gio/Polarization/pol-ccard_depth-dist/20250503-shimp-on-transect/',
-               '/home/sam/bucket/Gio/Polarization/pol-ccard_depth-dist/20250503-shimp-on-transect/reverse/' ]
+dataset_paths=[f'{fieldwork_data_dir}/20250328-back-forth/',
+               f'{fieldwork_data_dir}/20250328-back-forth/Reverse/',
+               f'{fieldwork_data_dir}/20250404_temp/',
+               f'{fieldwork_data_dir}/20250404_temp/Reverse/',
+               f'{fieldwork_data_dir}/20250408/',
+               f'{fieldwork_data_dir}/20250417/',
+               f'{fieldwork_data_dir}/20250430/dive1/series1/',
+               f'{fieldwork_data_dir}/20250430/dive1/series1/reverse/',
+               f'{fieldwork_data_dir}/20250501-depth-cloudy/series1/',
+               f'{fieldwork_data_dir}/20250501-depth-cloudy/series1/reverse/',
+               f'{fieldwork_data_dir}/20250502-depth-sunny/',
+               f'{fieldwork_data_dir}/20250503-shimp-on-transect/',
+               f'{fieldwork_data_dir}/20250503-shimp-on-transect/reverse/' ]
 
 
+# Select a folder for this preprocessing run.
+data_path = dataset_paths[0]
 dataf=pd.read_csv(glob.glob(data_path + '*data.csv')[0])
 
 dataf[['date', 'z', 'm']] = dataf['name_tag'].str.extract(r'(\d{8})-(\d+)z(\d+)m')
@@ -386,26 +394,26 @@ print("✅ processing finished →", len(all_int), "intensity points")
     
 #%% Calculate information of interest from field data
     
-dataset_paths=['/home/sam/bucket/Gio/Polarization/pol-ccard_depth-dist/20250501-depth-cloudy/series1/',
-               '/home/sam/bucket/Gio/Polarization/pol-ccard_depth-dist/20250501-depth-cloudy/series1/reverse/',
-               '/home/sam/bucket/Gio/Polarization/pol-ccard_depth-dist/20250502-depth-sunny/',
-               '/home/sam/bucket/Gio/Polarization/pol-ccard_depth-dist/20250328-back-forth/',
-               '/home/sam/bucket/Gio/Polarization/pol-ccard_depth-dist/20250328-back-forth/Reverse/',
-               '/home/sam/bucket/Gio/Polarization/pol-ccard_depth-dist/20250404_temp/',
-               '/home/sam/bucket/Gio/Polarization/pol-ccard_depth-dist/20250404_temp/Reverse/',
-               '/home/sam/bucket/Gio/Polarization/pol-ccard_depth-dist/20250408/',
-               '/home/sam/bucket/Gio/Polarization/pol-ccard_depth-dist/20250417/',
-               '/home/sam/bucket/Gio/Polarization/pol-ccard_depth-dist/20250430/dive1/series1/',
-               '/home/sam/bucket/Gio/Polarization/pol-ccard_depth-dist/20250430/dive1/series1/reverse/',
-               '/home/sam/bucket/Gio/Polarization/pol-ccard_depth-dist/20250501-depth-cloudy/series1/',
-               '/home/sam/bucket/Gio/Polarization/pol-ccard_depth-dist/20250501-depth-cloudy/series1/reverse/',
-               '/home/sam/bucket/Gio/Polarization/pol-ccard_depth-dist/20250502-depth-sunny/',
-               '/home/sam/bucket/Gio/Polarization/pol-ccard_depth-dist/20250503-shimp-on-transect/',
-               '/home/sam/bucket/Gio/Polarization/pol-ccard_depth-dist/20250503-shimp-on-transect/reverse/' ,
-               '/home/sam/bucket/Gio/Polarization/pol-ccard_depth-dist/20250325_temp_folder/']
+dataset_paths=[f'{fieldwork_data_dir}/20250501-depth-cloudy/series1/',
+               f'{fieldwork_data_dir}/20250501-depth-cloudy/series1/reverse/',
+               f'{fieldwork_data_dir}/20250502-depth-sunny/',
+               f'{fieldwork_data_dir}/20250328-back-forth/',
+               f'{fieldwork_data_dir}/20250328-back-forth/Reverse/',
+               f'{fieldwork_data_dir}/20250404_temp/',
+               f'{fieldwork_data_dir}/20250404_temp/Reverse/',
+               f'{fieldwork_data_dir}/20250408/',
+               f'{fieldwork_data_dir}/20250417/',
+               f'{fieldwork_data_dir}/20250430/dive1/series1/',
+               f'{fieldwork_data_dir}/20250430/dive1/series1/reverse/',
+               f'{fieldwork_data_dir}/20250501-depth-cloudy/series1/',
+               f'{fieldwork_data_dir}/20250501-depth-cloudy/series1/reverse/',
+               f'{fieldwork_data_dir}/20250502-depth-sunny/',
+               f'{fieldwork_data_dir}/20250503-shimp-on-transect/',
+               f'{fieldwork_data_dir}/20250503-shimp-on-transect/reverse/' ,
+               f'{fieldwork_data_dir}/20250325_temp_folder/']
 
     
-dataset_paths= ['/home/sam/bucket/Gio/Polarization/pol-ccard_depth-dist/20250502-depth-sunny/']
+dataset_paths= [f'{fieldwork_data_dir}/20250502-depth-sunny/']
 
 
 
@@ -543,24 +551,30 @@ for data_path in dataset_paths:
 #%% DoLP background (EDF 13a)
 
 import os, glob, h5py
+from pathlib import Path
 import numpy as np
 import matplotlib.pyplot as plt
 
+if 'fieldwork_data_dir' not in globals():
+    fieldwork_data_dir = Path.home() / 'bucket/ReiterU/Gio/Polarization/pol-ccard_depth-dist'
+    if not fieldwork_data_dir.is_dir():
+        fieldwork_data_dir = Path('/bucket/ReiterU/Gio/Polarization/pol-ccard_depth-dist')
+
 # ── Dataset folders ───────────────────────────────────────────────
 dataset_paths = [
-    '/home/sam/bucket/Gio/Polarization/pol-ccard_depth-dist/20250501-depth-cloudy/series1/',
-    '/home/sam/bucket/Gio/Polarization/pol-ccard_depth-dist/20250501-depth-cloudy/series1/reverse/',
-    '/home/sam/bucket/Gio/Polarization/pol-ccard_depth-dist/20250502-depth-sunny/',
-    '/home/sam/bucket/Gio/Polarization/pol-ccard_depth-dist/20250328-back-forth/',
-    '/home/sam/bucket/Gio/Polarization/pol-ccard_depth-dist/20250328-back-forth/Reverse/',
-    '/home/sam/bucket/Gio/Polarization/pol-ccard_depth-dist/20250404_temp/',
-    '/home/sam/bucket/Gio/Polarization/pol-ccard_depth-dist/20250404_temp/Reverse/',
-    '/home/sam/bucket/Gio/Polarization/pol-ccard_depth-dist/20250408/',
-    '/home/sam/bucket/Gio/Polarization/pol-ccard_depth-dist/20250417/',
-    '/home/sam/bucket/Gio/Polarization/pol-ccard_depth-dist/20250430/dive1/series1/',
-    '/home/sam/bucket/Gio/Polarization/pol-ccard_depth-dist/20250430/dive1/series1/reverse/',
-    '/home/sam/bucket/Gio/Polarization/pol-ccard_depth-dist/20250503-shimp-on-transect/',
-    '/home/sam/bucket/Gio/Polarization/pol-ccard_depth-dist/20250325_temp_folder/'
+    f'{fieldwork_data_dir}/20250501-depth-cloudy/series1/',
+    f'{fieldwork_data_dir}/20250501-depth-cloudy/series1/reverse/',
+    f'{fieldwork_data_dir}/20250502-depth-sunny/',
+    f'{fieldwork_data_dir}/20250328-back-forth/',
+    f'{fieldwork_data_dir}/20250328-back-forth/Reverse/',
+    f'{fieldwork_data_dir}/20250404_temp/',
+    f'{fieldwork_data_dir}/20250404_temp/Reverse/',
+    f'{fieldwork_data_dir}/20250408/',
+    f'{fieldwork_data_dir}/20250417/',
+    f'{fieldwork_data_dir}/20250430/dive1/series1/',
+    f'{fieldwork_data_dir}/20250430/dive1/series1/reverse/',
+    f'{fieldwork_data_dir}/20250503-shimp-on-transect/',
+    f'{fieldwork_data_dir}/20250325_temp_folder/'
 ]
 
 
@@ -612,7 +626,7 @@ plt.show()
 
 
 
-file='/home/sam/bucket/Gio/Polarization/pol-ccard_depth-dist/20250503-shimp-on-transect/20250503-06z03m02_raw.npy'
+file=f'{fieldwork_data_dir}/20250503-shimp-on-transect/20250503-06z03m02_raw.npy'
 all_imgs = np.load(file)
 dolp_img=all_imgs[0]
 int_img=all_imgs[1]
@@ -691,10 +705,16 @@ Adds:
 """
 
 import math, glob, os, h5py
+from pathlib import Path
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 from  scipy.optimize import curve_fit
+
+if 'fieldwork_data_dir' not in globals():
+    fieldwork_data_dir = Path.home() / 'bucket/ReiterU/Gio/Polarization/pol-ccard_depth-dist'
+    if not fieldwork_data_dir.is_dir():
+        fieldwork_data_dir = Path('/bucket/ReiterU/Gio/Polarization/pol-ccard_depth-dist')
 
 # ───────────────────────────────────────────────────────────────
 # Helpers
@@ -715,16 +735,16 @@ mm2in = lambda mm: mm / 25.4
 # Parameters and paths
 # ───────────────────────────────────────────────────────────────
 dataset_paths = [
-    '/home/sam/bucket/Gio/Polarization/pol-ccard_depth-dist/20250325_temp_folder/',
-    '/home/sam/bucket/Gio/Polarization/pol-ccard_depth-dist/20250328-back-forth/',
-    '/home/sam/bucket/Gio/Polarization/pol-ccard_depth-dist/20250328-back-forth/Reverse/',
-    '/home/sam/bucket/Gio/Polarization/pol-ccard_depth-dist/20250404_temp/',
-    '/home/sam/bucket/Gio/Polarization/pol-ccard_depth-dist/20250404_temp/Reverse/',
-    '/home/sam/bucket/Gio/Polarization/pol-ccard_depth-dist/20250408/',
-    '/home/sam/bucket/Gio/Polarization/pol-ccard_depth-dist/20250417/',
-    '/home/sam/bucket/Gio/Polarization/pol-ccard_depth-dist/20250430/dive1/series1/',
-    '/home/sam/bucket/Gio/Polarization/pol-ccard_depth-dist/20250430/dive1/series1/reverse/',
-    '/home/sam/bucket/Gio/Polarization/pol-ccard_depth-dist/20250503-shimp-on-transect/'
+    f'{fieldwork_data_dir}/20250325_temp_folder/',
+    f'{fieldwork_data_dir}/20250328-back-forth/',
+    f'{fieldwork_data_dir}/20250328-back-forth/Reverse/',
+    f'{fieldwork_data_dir}/20250404_temp/',
+    f'{fieldwork_data_dir}/20250404_temp/Reverse/',
+    f'{fieldwork_data_dir}/20250408/',
+    f'{fieldwork_data_dir}/20250417/',
+    f'{fieldwork_data_dir}/20250430/dive1/series1/',
+    f'{fieldwork_data_dir}/20250430/dive1/series1/reverse/',
+    f'{fieldwork_data_dir}/20250503-shimp-on-transect/'
 ]
 T_I, T_D   = 0.118, 0.059
 CAP_MAX    = 25.0
@@ -850,7 +870,7 @@ crop   = (slice(560, 710), slice(760, 1190))   # crop for display maps
 bkg_sl = (slice(300, 600), slice(700, 1200))   # background sampling
 
 
-data_path='/home/sam/bucket/Gio/Polarization/pol-ccard_depth-dist/20250503-shimp-on-transect/raws/shrimp/extras/'
+data_path=f'{fieldwork_data_dir}/20250503-shimp-on-transect/raws/shrimp/extras/'
 
 
 curr_h = load_orf_extract_green(data_path + 'P5033002.ORF').astype('float32')
@@ -900,7 +920,7 @@ PD    = np.sqrt(PD_sq)
 
 weber_int = (int_img  - bkg_int)  / bkg_int
 weber_int[np.abs(weber_int)<0.118]=0
-shrimp_mask=cv2.imread('/home/sam/bucket/Gio/Polarization/pol-ccard_depth-dist/20250503-shimp-on-transect/raws/shrimp/extras/mask_image.jpg',0)
+shrimp_mask = cv2.imread(os.path.join(data_path, 'mask_image.jpg'), 0)
 shrimp_mask=shrimp_mask>0
 
 ddolp_vals     = delta_DoLP[shrimp_mask]
@@ -956,7 +976,7 @@ from  scipy.optimize import curve_fit
 
 # ───────────────────────────────────────────────────────────────
 # 1)  Load CSV  (edit path if needed)
-csv_path = Path("/home/sam/OL_toplogy/field/2025.06.16_transect_06_OIST.csv")
+csv_path = Path.home() / 'OL_toplogy/field/2025.06.16_transect_06_OIST.csv'
 df = pd.read_csv(csv_path)
 
 # ───────────────────────────────────────────────────────────────

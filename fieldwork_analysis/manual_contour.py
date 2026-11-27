@@ -9,7 +9,7 @@ Created on Thu Jun  6 16:06:18 2024
 import cv2
 import numpy as np
 import matplotlib.pyplot as plt
-import glob
+from pathlib import Path
 # Function to draw contours
 def draw_contour(event, x, y, flags, param):
     global drawing, contour, img_copy
@@ -51,18 +51,20 @@ def enhance_contrast(image):
 
     return image_eq
 
-# Load an image
-image_path = '/home/sam/bucket/sam/igl_wave/'
-img_name=glob.glob(image_path + '/*frame_0.png')
+# Load an image and save its mask in the same folder.
+fieldwork_data_dir = Path.home() / 'bucket/ReiterU/Gio/Polarization/pol-ccard_depth-dist'
+if not fieldwork_data_dir.is_dir():
+    fieldwork_data_dir = Path('/bucket/ReiterU/Gio/Polarization/pol-ccard_depth-dist')
+image_path = fieldwork_data_dir / '20250503-shimp-on-transect/raws/shrimp/extras'
 
-#img_name=glob.glob(image_path + '*01*dolp.png')
-#img_name=glob.glob(image_path + '*01_rev_dolp.png')
-
-img_name=['/home/sam/bucket/Gio/Polarization/pol-ccard_depth-dist/20250503-shimp-on-transect/raws/shrimp/extras/P5033002_green.png']
+# img_name = sorted(image_path.glob('*frame_0.png'))
+# img_name = sorted(image_path.glob('*01*dolp.png'))
+# img_name = sorted(image_path.glob('*01_rev_dolp.png'))
+img_name = [image_path / 'P5033002_green.png']
 
 for im_name in img_name:
 
-    img = cv2.imread(im_name)
+    img = cv2.imread(str(im_name))
     
     img = enhance_contrast(img)
     img_copy = img.copy()
@@ -92,8 +94,8 @@ for im_name in img_name:
         cv2.drawContours(mask, [np.array(contour)], -1, (255), thickness=cv2.FILLED)
     
     # Save the mask image
-    cv2.imwrite(image_path +'/mask_image.jpg', mask)
-   # cv2.imwrite(im_name +'_fg_image_raw.png', mask)
+    cv2.imwrite(str(image_path / 'mask_image.jpg'), mask)
+    # cv2.imwrite(f'{im_name}_fg_image_raw.png', mask)
     
     # Display the mask image using matplotlib
     # plt.figure()

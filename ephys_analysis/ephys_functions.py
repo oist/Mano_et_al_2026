@@ -13,7 +13,7 @@ from scipy.signal import welch,convolve
 import pandas as pd
 import glob
 from pathlib import Path
-from DemoReadSGLXData.readSGLX import readMeta, SampRate, makeMemMapRaw, GainCorrectIM, GainCorrectNI
+#from DemoReadSGLXData.readSGLX import readMeta, SampRate, makeMemMapRaw, GainCorrectIM, GainCorrectNI
 import os
 from scipy.interpolate import interp1d
 import nibabel as nb
@@ -33,7 +33,6 @@ import cv2
 from scipy.spatial.distance import cdist
 from scipy.stats import pearsonr
 import numpy as np
-from probeinterface import get_probe
 from scipy.spatial.distance import euclidean
 from scipy.spatial.distance import pdist, squareform
 

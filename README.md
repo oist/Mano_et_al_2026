@@ -1,19 +1,34 @@
 # Mano_et_al_2026
 
-Analysis code and figure-generation notebooks for Mano et al. (2026), a study of squid vision. The repository covers calcium imaging and electrophysiology of the squid visual system, optic-lobe anatomy, and measurements of light intensity and polarization in the field.
+Analysis code and figure-generation notebooks for Mano et al. (2026), a study of how the optic lobe of the bigfin reef squid (*Sepioteuthis lessoniana*) processes light intensity and polarization. The code covers calcium imaging, electrophysiology, optic-lobe anatomy, and underwater measurements of light intensity and polarization. [Read the bioRxiv preprint](https://doi.org/10.64898/2026.01.08.698312).
 
-## Start here with the toy data and analysis
+## Toy example for electrophysiology receptive fields
 
-The toy dataset and analysis are in [`ephys_analysis/Example_Code/`](ephys_analysis/Example_Code/). Open [`EXAMPLE_CODE_RF_ANALYSIS.ipynb`](ephys_analysis/Example_Code/EXAMPLE_CODE_RF_ANALYSIS.ipynb) to see how spike times from a single probe are aligned to sparse-noise stimulus frames. The notebook builds ON and OFF receptive-field maps, plots peristimulus time histograms, and estimates receptive-field centers and sizes. The analysis functions are in [`RF_FUNCTIONS.py`](ephys_analysis/Example_Code/RF_FUNCTIONS.py).
+Open [`EXAMPLE_CODE_RF_ANALYSIS.ipynb`](ephys_analysis/Example_Code/EXAMPLE_CODE_RF_ANALYSIS.ipynb) in Jupyter to view the code and saved figures. The notebook aligns spikes from a single probe to sparse-noise stimulus frames, maps responses to bright (ON) and dark (OFF) stimuli, plots peristimulus time histograms, and estimates receptive-field centers and sizes. [Analysis functions](ephys_analysis/Example_Code/RF_FUNCTIONS.py).
+
+### Bundled data
+
+All five NumPy inputs are in [`ephys_analysis/Example_Code/`](ephys_analysis/Example_Code/) alongside the notebook. To download them individually on GitHub, open a file below and select **Download raw file**.
 
 | Bundled data file | Contents |
 | --- | --- |
-| [`spike_t_matrix.npy`](ephys_analysis/Example_Code/spike_t_matrix.npy) | Spike times in seconds for 24 units |
+| [`spike_t_matrix.npy`](ephys_analysis/Example_Code/spike_t_matrix.npy) | Spike times in seconds for 24 units, stored as a NumPy object array with one entry per unit |
 | [`g_ids.npy`](ephys_analysis/Example_Code/g_ids.npy) | Unit IDs in the same order as the spike-time array |
 | [`g_channels.npy`](ephys_analysis/Example_Code/g_channels.npy) | Peak probe channel for each unit |
-| [`stim_windows.npy`](ephys_analysis/Example_Code/stim_windows.npy) | Start and end times in seconds for the stimulus frames |
+| [`stim_windows.npy`](ephys_analysis/Example_Code/stim_windows.npy) | Start and end times in seconds for 16,800 stimulus frames, in presentation order |
+| [`sparse_noise_matrix.npy`](ephys_analysis/Example_Code/sparse_noise_matrix.npy) | The 16,800 sparse-noise frames in the same order as `stim_windows.npy`, on a 12 × 21 grid (32 MiB) |
 
-**Required to rerun the example.** The notebook also reads `sparse_noise_matrix.npy`, which contains the sparse-noise frames corresponding to `stim_windows.npy`. The stimulus matrix is missing from this repository. With the matching file in `ephys_analysis/Example_Code/`, open the notebook in Jupyter with that directory as the working directory. The Python dependencies are NumPy, SciPy, pandas, Matplotlib, scikit-image, and tqdm.
+### Rerun the notebook
+
+From the repository root, install the Python dependencies and launch JupyterLab from the example folder so the notebook can load all five inputs by filename.
+
+```bash
+python -m pip install jupyterlab numpy scipy pandas matplotlib scikit-image tqdm
+cd ephys_analysis/Example_Code
+jupyter lab EXAMPLE_CODE_RF_ANALYSIS.ipynb
+```
+
+Select **Run → Run All Cells**.
 
 ## Paper analyses and supporting code
 
@@ -27,33 +42,9 @@ The toy dataset and analysis are in [`ephys_analysis/Example_Code/`](ephys_analy
 | [`monitor_cal.ipynb`](monitor_cal.ipynb) | Display calibration and plotting. Additional [LCD calibration and calcium-response notebooks](calcium_analysis/sup_calcium_LCD/) are under `calcium_analysis/`. |
 | [`singularity/`](singularity/) | Container definitions and build instructions for [calcium imaging analysis](singularity/ophys_v3/README.md) and [DeepInterpolation](singularity/deepinterpolation/README.md). |
 
-Many paper analyses reference recordings and intermediate files on OIST lab storage. Running those workflows requires access to the corresponding inputs and updating the data and cluster paths for your environment.
+### Run a paper analysis
 
-## Figure formatting
+- **Electrophysiology receptive fields.** Start with [`EXTRACT_RF_PROPERTIES.ipynb`](ephys_analysis/Receptive_Field_Analysis/EXTRACT_RF_PROPERTIES.ipynb) for estimates from recordings or with [`RF_ANALYSIS.ipynb`](ephys_analysis/Receptive_Field_Analysis/RF_ANALYSIS.ipynb) for population plots using processed receptive-field measurements.
+- **Calcium imaging.** Start with motion correction and denoising, followed by cell detection and fluorescence trace extraction for cell-based analyses. The recording-level and summary notebooks live in the analysis folder for each experiment. [Preprocessing](calcium_scripts/preprocessing/README.md) · [Cell detection and trace extraction](calcium_scripts/ROI_detection/README.md).
 
-Use widths of 184 mm for two-column figures and 92 mm for single-column figures, with 7-point Arial. The Matplotlib settings below embed TrueType fonts for editing PDFs in Adobe Illustrator. Replace the font path with the location of Arial on your system.
-
-```python
-from matplotlib import font_manager
-import matplotlib as mpl
-
-font_manager.fontManager.addfont('/bucket/ReiterU/common/fonts/arial.ttf')
-mpl.rcParams.update({
-    'font.size': 7,
-    'axes.titlesize': 7,
-    'legend.fontsize': 7,
-    'font.family': 'sans-serif',
-    'font.sans-serif': 'Arial',
-    'pdf.fonttype': 42,
-    'ps.fonttype': 42,
-    'axes.linewidth': 0.5,
-    'xtick.major.width': 0.5,
-    'xtick.major.size': 2,
-    'xtick.minor.size': 2,
-    'xtick.minor.width': 0.5,
-    'ytick.major.width': 0.5,
-    'ytick.major.size': 2,
-    'ytick.minor.size': 2,
-    'ytick.minor.width': 0.5,
-})
-```
+Many paper workflows read recordings, stimulus files, atlases, or intermediate results from OIST lab storage. Obtain the inputs for the workflow you want to run, then update its data and output paths for your environment. The calcium imaging batch jobs also use Slurm and the Singularity environments linked above.

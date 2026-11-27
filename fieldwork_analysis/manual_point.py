@@ -9,9 +9,13 @@ import cv2
 import numpy as np
 import os
 import glob
+from pathlib import Path
 
 # ─────── CONFIG ───────
-IMG_DIR    = '/home/sam/bucket/Gio/Polarization/pol-ccard_depth-dist/20250501-depth-cloudy/series2/reverse/'
+fieldwork_data_dir = Path.home() / 'bucket/ReiterU/Gio/Polarization/pol-ccard_depth-dist'
+if not fieldwork_data_dir.is_dir():
+    fieldwork_data_dir = Path('/bucket/ReiterU/Gio/Polarization/pol-ccard_depth-dist')
+IMG_DIR    = fieldwork_data_dir / '20250501-depth-cloudy/series2/reverse'
 PATTERN    = '*green.png'
 WIN_NAME   = 'Image'
 WIN_WIDTH  = 1280

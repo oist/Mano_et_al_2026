@@ -1,5 +1,7 @@
+#%%
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+
 """
 Created on Tue Dec 12 14:09:06 2023
 
@@ -1884,199 +1886,205 @@ for curr_ephys_path in curr_ephys_paths:
 
 
 
-#%% calculate receptive fields for LFP
+#%% Calculate receptive fields for LFP (EDF 11)
+from pathlib import Path
+import sys
 
-curr_ephys_paths = ['/home/sam/bucket/electrophysiology/squidOL/2024_02_05/',
-                    '/home/sam/bucket/electrophysiology/squidOL/2024_02_13/',
-                    '/home/sam/bucket/electrophysiology/squidOL/2024_05_28/',
-                    '/home/sam/bucket/electrophysiology/squidOL/2024_06_24/',
-                    '/home/sam/bucket/electrophysiology/squidOL/2024_06_27/',
-                    '/home/sam/bucket/electrophysiology/squidOL/2024_09_10/',
-                    '/home/sam/bucket/electrophysiology/squidOL/2024_10_22/',
-                    '/home/sam/bucket/electrophysiology/squidOL/2024_11_01/',
-                    '/home/sam/bucket/electrophysiology/squidOL/2024_11_12/']
-
-
-curr_anatamy_paths = ['/home/sam/bucket/DBS/data/20240221_F66_squid_Neuropixels_record0205',
-                      '/home/sam/bucket/DBS/data/20240223_F68_squid_Neuropixels_record0213',
-                      '/home/sam/bucket/DBS/data/20240609_F89_NP_recording_0528',
-                      '/home/sam/bucket/DBS/data/20240712_F99_squid_NP_recording_0624_TOPRO_3',
-                      '/home/sam/bucket/DBS/data/20240716_F100_squid_NP_recording_0627_TOPRO_3',
-                      '/home/sam/bucket/DBS/data/20240923_F105_squid_NP_recording_0910_TOPRO_3',
-                      '/home/sam/bucket/DBS/data/20241101_F110_squid_kuwa_NP_recording_1022_TOPRO_3',
-                      '/home/sam/bucket/DBS/data/20241118_F113_squid_kuwa_NP_recording_1101_TOPRO_3',
-                      '/home/sam/bucket/DBS/data/20241125_F115_squid_kuwa_NP_recording_1112_TOPRO_3']
-
-all_depths=[]
-all_sizes=[]
-all_br=[]
-all_spD=[]
-all_chanD=[]
-all_inds=[]
-
-chan_diff_thresh=3
-
-for index in range(len(curr_ephys_paths)):
-
-    curr_ephys_path=curr_ephys_paths[index]
-    curr_anatamy_path=curr_anatamy_paths[index]
-    curr_experiment_path = glob.glob(curr_ephys_path + '/' + '*' + 'SN_LUM_size_5*')[0]
-
-    exp = load_ephys_results(curr_experiment_path,
-                             0, False, curr_anatamy_path, atlas_10, dt1)
-
-    for probe in range(len(exp['st_mat'])):
-        
-        if os.path.exists(exp['analysis_path'] + '/probe_' + str(probe) + 'good_lfp_chans.npy'):
-            all_rfs=np.load(exp['analysis_path'] + '/probe_' + str(probe) + 'lfp_rf.npy')
-            all_rfsnull=np.load(exp['analysis_path'] + '/probe_' + str(probe) + 'lfp_rfnull.npy')
-            good_mask=np.load(exp['analysis_path'] + '/probe_' + str(probe) + 'good_lfp_chans.npy')
-            chan_diff=np.load(exp['analysis_path'] + '/probe_' + str(probe) + 'chan_diff.npy')[0:len(good_mask)]
-            
-            standout_chans=np.concatenate(([0],np.diff(chan_diff)))
-            good_mask[standout_chans>chan_diff_thresh]=False
-            
-            if np.sum(good_mask)>0: #at least one good channel
-                print('good: ' + curr_ephys_path + '_' + str(probe))
-                all_centers=[]
-                all_chans=[]
-                brs=[]
-                sizes=[]
-                locs=[]
-                for chan in range(len(all_rfs)):
-                    rf_blob1, rf_size, rf_loc, filt_eta1, rf_diameter,rf_peakrate,rf_minrate, pos  =    calc_rf(all_rfs[chan],all_rfsnull[chan],peak_thresh=pt,blob_thresh=4,gaus_f=0,med_f=mf,upsample=5,force_polarity='negative')
-            
-                    all_chans.append(chan)
-                    if rf_size>0:
-    
-                        sizes.append(rf_size)
-                        locs.append(rf_loc)
-                    else:
-                        
-                        sizes.append(np.nan)
-                        locs.append([np.nan,np.nan])
-
-                curr_depths=exp['elec_depths'][probe][0:len(all_rfs)]
-                curr_br=exp['elec_brs'][probe][0:len(all_rfs)]
-                 
-                good_mask[curr_br!=1]=False
-                curr_chans=np.where(good_mask)[0]
-
-                # Filter depths and sizes using the mask
-                filtered_depths = np.array(curr_depths)[good_mask]
-                filtered_sizes = np.array(sizes)[0:len(curr_depths)][good_mask]
-                filtered_locs = np.array(locs)[0:len(curr_depths)][good_mask]
-                
-               
-                all_inds.append(index*np.ones_like(filtered_depths))
-                all_depths.append(filtered_depths)
-                all_sizes.append(filtered_sizes)
-                all_br.append(exp['elec_brs'][probe][0:len(curr_depths)][good_mask])
-                
-                spatial_dists = pdist(filtered_locs, metric='euclidean')
-                spatial_dists_probe = pdist(np10_site_positions()[curr_chans], metric='euclidean')  # 1-D vector
-
-                all_spD.append(spatial_dists)
-                all_chanD.append(spatial_dists_probe)
-
-            else:
-                print(exp['analysis_path'] + '/probe_' + str(probe))
-        
-all_depths=np.concatenate(all_depths)+0.0001 #don't want divide by zero
-all_sizes=np.concatenate(all_sizes)
-all_br=np.concatenate(all_br)
-all_spD=np.concatenate(all_spD)
-all_chanD=np.concatenate(all_chanD)
-all_inds=np.concatenate(all_inds)
-
-   
-good_neurons = (all_br < 3) & (~np.isnan(all_sizes))
-good_br=all_br[good_neurons]
-good_depths=all_depths[good_neurons]
-good_sizes=all_sizes[good_neurons]
-good_inds=all_inds[good_neurons]
-
-good_sizes_r=2*np.sqrt(good_sizes/np.pi)
-
-plot_smoothed_rf_size_vs_depth(good_depths*10, good_sizes,good_inds, title="Receptive Field Size vs Depth",
-                                   bandwidth=50.0, n_eval=100, save_path='lfp_rf_size.pdf')
-
-
-group_low  = good_sizes[good_depths < 50]
-group_high = good_sizes[good_depths > 50]
-
-stat, pval = mannwhitneyu(group_low, group_high,alternative='two-sided')
-
-print(f"Mann–Whitney U test statistic: {stat:.3f}")
-print(f"Two-sided p-value: {pval:.4e}")
-
-good_comparisons=(~np.isnan(all_spD))
-good_spD=all_spD[good_comparisons]
-good_chanD=all_chanD[good_comparisons]
-
-r, p = pearsonr(good_spD, good_chanD)
-
-# Plot
-plt.figure(figsize=(3,3))
-plt.scatter(good_chanD,good_spD, 5, 'k',alpha=0.7)
-plt.xlabel('distance in brain (um)')
-plt.ylabel('distance on screen (visual degree)')
-plt.title(f'Correlation: r = {r:.2f}, p = {p:.3f}')
-plt.tight_layout()
-plt.show()
-plt.savefig('retinotopy_lfp.pdf',dpi=600)
-
-import numpy as np
 import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
+from scipy.spatial.distance import pdist
+from scipy.stats import mannwhitneyu, pearsonr
 
-# ------------------------------------------------------------------
-# 1)  BIN-BY-DISTANCE IN BRAIN -------------------------------------
-# ------------------------------------------------------------------
-NUM_BINS = 20                         # change if needed
-bins        = np.linspace(good_chanD.min(),
-                          good_chanD.max(),
-                          NUM_BINS + 1)
-bin_centers = (bins[:-1] + bins[1:]) / 2
-bin_idx     = np.digitize(good_chanD, bins) - 1          # 0-based indices
+lfp_script_dir = Path(__file__).resolve().parent if '__file__' in globals() else Path.cwd()
+if (lfp_script_dir / 'ephys_analysis/ephys_functions.py').is_file():
+    lfp_script_dir /= 'ephys_analysis'
+if str(lfp_script_dir) not in sys.path:
+    sys.path.insert(0, str(lfp_script_dir))
 
-mean_sp = np.full(NUM_BINS, np.nan)
-std_sp  = np.full(NUM_BINS, np.nan)
+from ephys_functions import (
+    calc_rf,
+    calculate_unit_positions,
+    load_nifti,
+    np10_site_positions,
+    plot_smoothed_rf_size_vs_depth,
+)
 
-for i in range(NUM_BINS):
-    vals = good_spD[bin_idx == i]
-    if vals.size:                     # skip empty bins
-        mean_sp[i] = vals.mean()
-        std_sp[i]  = np.std(vals, ddof=1)                # sample SD
+lfp_bucket = Path.home() / 'bucket/ReiterU'
+if not lfp_bucket.is_dir():
+    lfp_bucket = Path('/bucket/ReiterU')
+lfp_data_dir = lfp_bucket / 'sam/Mano_et_al_2026_related/DATA_TEMPs'
+lfp_output_dir = Path.cwd()
 
-# ------------------------------------------------------------------
-# 2)  PLOT  — histogram with shaded error bars
-# ------------------------------------------------------------------
-fig, ax = plt.subplots(figsize=(4, 3))
+lfp_recordings = (
+    '2024_02_05/2024_02_05_rec03_SN_LUM_size_5',
+    '2024_02_13/2024_02_13_rec05_SN_LUM_size_5',
+    '2024_05_28/2024_05_28_rec08_SN_LUM_size_5',
+    '2024_06_24/2024_06_24_rec09_SN_LUM_size_5',
+    '2024_06_27/2024_06_27_rec08_SN_LUM_size_5',
+    '2024_09_10/2024_09_10_rec05_SN_LUM_size_5',
+    '2024_10_22/2024_10_22_rec02_SN_LUM_size_5_POL_0',
+    '2024_11_01/2024_11_01_rec02_SN_LUM_size_5_BG_0',
+    '2024_11_12/2024_11_12_rec06_SN_LUM_size_5_BG_0',
+)
 
-# bars ── very light fill, no edge so whiskers stand out
-bar_w = bins[1] - bins[0]
-ax.bar(bin_centers, mean_sp,
-       width=bar_w, color='skyblue', alpha=0.6, edgecolor='none',
-       label='Binned mean')
+atlas_dir = lfp_bucket / 'DBS/atlas/S_lessoniana_OL_v0.3/segmentation'
+atlas_path = atlas_dir / 'atlas_seg10.nii.gz'
+depth_path = atlas_dir / 'd_ogl.nii.gz'
+lfp_atlas = load_nifti(atlas_path)
+lfp_depth_map = load_nifti(depth_path)
+probe_positions = np10_site_positions()
+chan_diff_thresh = 3
+lfp_channels = []
+all_spD = []
+all_chanD = []
 
-# slim vertical whiskers + small caps
-mask = ~np.isnan(mean_sp)           # skip empty bins
-ax.errorbar(bin_centers[mask], mean_sp[mask], yerr=std_sp[mask],
-            fmt='none',                     # no marker
-            ecolor='midnightblue',
-            elinewidth=1.2,
-            capsize=3, capthick=1.2,
-            zorder=3)
+for index, relative_path in enumerate(lfp_recordings):
+    recording = lfp_data_dir / relative_path
+    analysis_dir = recording / 'analysis_folder'
+    mask_files = sorted(analysis_dir.glob('probe_*good_lfp_chans.npy'))
+    if not mask_files:
+        raise FileNotFoundError(f'No LFP channel masks found in {analysis_dir}')
 
-ax.set_xlabel('distance in brain (µm)')
-ax.set_ylabel('distance on screen (visual °)')
-ax.set_title(f'Correlation: r = {r:.2f}, p = {p:.3f}')
-ax.legend(frameon=False)
-plt.tight_layout()
+    for mask_path in mask_files:
+        prefix = mask_path.name.removesuffix('good_lfp_chans.npy')
+        probe = int(prefix.removeprefix('probe_'))
+        good_mask = np.load(mask_path)
+        if good_mask.ndim != 1 or good_mask.dtype != np.dtype(bool):
+            raise ValueError(f'Expected a one-dimensional Boolean channel mask in {mask_path}')
+        if not good_mask.any():
+            continue
 
-# save and show
-plt.savefig('retinotopy_lfp.pdf', dpi=600)
-plt.show()
+        channel_count = len(good_mask)
+        chan_diff = np.load(analysis_dir / f'{prefix}chan_diff.npy')[:channel_count]
+        if chan_diff.shape != good_mask.shape:
+            raise ValueError(f'Channel-difference vector does not match {mask_path}')
+        good_mask[np.diff(chan_diff, prepend=chan_diff[0]) > chan_diff_thresh] = False
+
+        # Use the original anatomy transforms and retain their channel row order.
+        track_path = analysis_dir / 'probe_skeleton' / f'probe_{probe + 1}_transformed.csv'
+        track = pd.read_csv(track_path)
+        track = track.loc[track['channel'] >= 0].iloc[:channel_count]
+        if len(track) != channel_count:
+            raise ValueError(f'Probe track is shorter than the channel mask: {track_path}')
+        _, depths, _, regions = calculate_unit_positions(
+            atlas_path, depth_path, track, [], lfp_atlas, lfp_depth_map
+        )
+        selected = np.flatnonzero(good_mask & (regions == 1))
+        if not selected.size:
+            continue
+
+        rfs = np.load(analysis_dir / f'{prefix}lfp_rf.npy')
+        null_rfs = np.load(analysis_dir / f'{prefix}lfp_rfnull.npy')
+        if rfs.ndim != 3 or rfs.shape != null_rfs.shape or len(rfs) < channel_count:
+            raise ValueError(f'RF maps and channel mask do not align for {recording.name}, probe {probe}')
+
+        sizes = []
+        centers = []
+        for channel in selected:
+            _, area, center, *_ = calc_rf(
+                rfs[channel], null_rfs[channel], peak_thresh=4, blob_thresh=4,
+                gaus_f=0, med_f=0, upsample=5, force_polarity='negative',
+            )
+            sizes.append(area if area > 0 else np.nan)
+            centers.append(center if area > 0 else (np.nan, np.nan))
+
+        lfp_channels.append(pd.DataFrame({
+            'recording': recording.name,
+            'probe': probe,
+            'channel': selected,
+            'depth_voxels': depths[selected],
+            'region': regions[selected],
+            'recording_index': index,
+            'rf_area_deg2': sizes,
+        }))
+        all_spD.append(pdist(centers))
+        all_chanD.append(pdist(probe_positions[selected]))
+
+if not lfp_channels:
+    raise ValueError('No LFP channels passed the channel-mask and medulla filters.')
+
+lfp_channel_results = pd.concat(lfp_channels, ignore_index=True)
+all_depths = lfp_channel_results['depth_voxels'].to_numpy() + 0.0001
+all_sizes = lfp_channel_results['rf_area_deg2'].to_numpy()
+all_br = lfp_channel_results['region'].to_numpy()
+all_inds = lfp_channel_results['recording_index'].to_numpy()
+all_spD = np.concatenate(all_spD)
+all_chanD = np.concatenate(all_chanD)
+
+good_neurons = (all_br < 3) & np.isfinite(all_sizes)
+good_depths = all_depths[good_neurons]
+good_sizes = all_sizes[good_neurons]
+good_inds = all_inds[good_neurons]
+good_br = all_br[good_neurons]
+good_sizes_r = 2 * np.sqrt(good_sizes / np.pi)
+if not good_sizes.size:
+    raise ValueError('No channel passed the LFP receptive-field threshold.')
+
+lfp_rf_sizes = lfp_channel_results.loc[
+    good_neurons, ['recording', 'probe', 'channel', 'rf_area_deg2']
+].copy()
+lfp_rf_sizes.insert(3, 'depth_um', lfp_channel_results.loc[good_neurons, 'depth_voxels'] * 10)
+lfp_rf_sizes['equivalent_diameter_deg'] = good_sizes_r
+lfp_rf_sizes.to_csv(lfp_output_dir / 'lfp_rf_sizes.csv', index=False)
+print(f'Saved {len(lfp_rf_sizes)} LFP receptive-field sizes to {lfp_output_dir / "lfp_rf_sizes.csv"}')
+
+plot_smoothed_rf_size_vs_depth(
+    good_depths * 10, good_sizes, good_inds, title='Receptive Field Size vs Depth',
+    bandwidth=50.0, n_eval=100, save_path=lfp_output_dir / 'lfp_rf_size.pdf',
+)
+
+group_low = good_sizes[good_depths < 50]
+group_high = good_sizes[good_depths > 50]
+if group_low.size and group_high.size:
+    stat, pval = mannwhitneyu(group_low, group_high, alternative='two-sided')
+    print(f'Mann–Whitney U test statistic: {stat:.3f}')
+    print(f'Two-sided p-value: {pval:.4e}')
+
+good_comparisons = np.isfinite(all_spD) & np.isfinite(all_chanD)
+good_spD = all_spD[good_comparisons]
+good_chanD = all_chanD[good_comparisons]
+
+if good_chanD.size >= 2 and np.ptp(good_chanD) > 0 and np.ptp(good_spD) > 0:
+    r, p = pearsonr(good_spD, good_chanD)
+
+    plt.figure(figsize=(3, 3))
+    plt.scatter(good_chanD, good_spD, s=5, color='black', alpha=0.7)
+    plt.xlabel('distance in brain (um)')
+    plt.ylabel('distance on screen (visual degree)')
+    plt.title(f'Correlation: r = {r:.2f}, p = {p:.3f}')
+    plt.tight_layout()
+    plt.show()
+
+    num_bins = 20
+    bins = np.linspace(good_chanD.min(), good_chanD.max(), num_bins + 1)
+    bin_centers = (bins[:-1] + bins[1:]) / 2
+    bin_idx = np.searchsorted(bins[1:-1], good_chanD, side='right')
+    binned_distances = [good_spD[bin_idx == i] for i in range(num_bins)]
+    populated = [values.size > 0 for values in binned_distances]
+
+    fig, ax = plt.subplots(figsize=(4, 3))
+    box_line = {'color': 'midnightblue', 'linewidth': 0.8}
+    ax.boxplot(
+        [values for values in binned_distances if values.size],
+        positions=bin_centers[populated],
+        widths=0.75 * (bins[1] - bins[0]),
+        whis=1.5,
+        manage_ticks=False,
+        patch_artist=True,
+        boxprops={'facecolor': 'skyblue', 'edgecolor': 'midnightblue', 'alpha': 0.6},
+        medianprops={'color': 'midnightblue', 'linewidth': 1.2},
+        whiskerprops=box_line,
+        capprops=box_line,
+        flierprops={'marker': 'o', 'markersize': 2, 'markerfacecolor': 'midnightblue',
+                    'markeredgewidth': 0, 'alpha': 0.2},
+    )
+    ax.set_xlabel('distance in brain (µm)')
+    ax.set_ylabel('distance on screen (visual °)')
+    ax.set_title(f'Correlation: r = {r:.2f}, p = {p:.3f}')
+    fig.tight_layout()
+    fig.savefig(lfp_output_dir / 'retinotopy_lfp.pdf', dpi=600)
+    plt.show()
 
 
 #%% #Single dataset example figs from 2_13. I load things up as above and just plot intermediate steps

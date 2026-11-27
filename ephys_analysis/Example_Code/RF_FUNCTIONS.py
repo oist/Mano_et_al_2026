@@ -283,14 +283,14 @@ def calc_rf(eta, base_eta, peak_thresh=4, blob_thresh=3, gaus_f=1, med_f=1, upsa
         filt_eta=gaussian_filter(eta, gaus_f)
         filt_base=gaussian_filter(base_eta, gaus_f)
     mean_eta = np.mean(filt_base)
-    etd_eta = np.std(filt_base)
+    std_eta = np.std(filt_base)
     filt_eta=filt_eta-mean_eta
     max_deviation = np.max(filt_eta)
     min_deviation = np.min(filt_eta)
     if force_polarity == 'positive':
         peak_coords = np.unravel_index(np.argmax(filt_eta), filt_eta.shape)
         binary_rf = filt_eta > (blob_thresh * std_eta)
-        cleared_peak_thresh = filt_eta[peak_coords] > (peak_thresh * etd_eta)
+        cleared_peak_thresh = filt_eta[peak_coords] > (peak_thresh * std_eta)
         pos = 1
     elif force_polarity == 'negative':
         peak_coords = np.unravel_index(np.argmin(filt_eta), filt_eta.shape)
@@ -309,7 +309,7 @@ def calc_rf(eta, base_eta, peak_thresh=4, blob_thresh=3, gaus_f=1, med_f=1, upsa
             cleared_peak_thresh = filt_eta[peak_coords] < (-1 * peak_thresh * std_eta)
             pos = -1
     if cleared_peak_thresh:
-        labeled_rf, num_features = label(binary_rf)
+        labeled_rf = label(binary_rf)
         regions = regionprops(labeled_rf)
         # Assuming the largest labeled area is the receptive field
         largest_area = max(regions, key=lambda x: x.area) if regions else None
