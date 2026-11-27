@@ -160,3 +160,13 @@ cython_debug/
 #  and can be added to the global gitignore or merged into this file.  For a more nuclear
 #  option (not recommended) you can uncomment the following to ignore the entire idea folder.
 #.idea/
+
+# Generated electrophysiology and fieldwork outputs
+/ephys_analysis/lfp_rf_size.pdf
+/ephys_analysis/lfp_rf_sizes.csv
+/ephys_analysis/retinotopy_lfp.pdf
+/fieldwork_analysis/dolp_bg.pdf
+/fieldwork_analysis/dolp_int_card.pdf
+/fieldwork_analysis/gio_combined_2x5.pdf
+/fieldwork_analysis/sighting_distance_summary.csv
+/fieldwork_analysis/sighting_distances.csv
